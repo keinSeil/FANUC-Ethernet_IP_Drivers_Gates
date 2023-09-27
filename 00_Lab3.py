@@ -12,10 +12,11 @@ from robot_controller import robot  # Assuming robot_controller.py is the file y
 # Global Constants
 drive_path = '172.29.209.124' # Beaker
 
+ts = 0.5
+
 pose0 = [92.87217712402344,18.125370025634766,-41.355613708496094,0.8590555787086487,-49.22829055786133,-63.55329132080078]
 # pose1 = [89.81889343261719,24.53651237487793,-51.20912170410156,-4.0175862312316895,-37.36531448364258,-56.51060104370117]
 pose1 = [94.2, 24.5, -53, 2.24, -36.9, -64.1] # v2
-
 pose2 = [45.07453155517578,45.947452545166016,-8.966269493103027,1.5336558818817139,-80.24510192871094,-16.003690719604492]
 pose3 = [40.18388366699219,57.8693733215332,-16.98442268371582,-1.184096097946167,-71.86784362792969,-12.543599128723145]
 # pose4 = [91.19219207763672,18.180511474609375,-41.26266098022461,-0.07059883326292038,-48.42890548706055,-62.886844635009766] 
@@ -40,7 +41,7 @@ def main():
         
         # Open gripper
         crx10.gripper("open")
-        time.sleep(.5)
+        time.sleep(ts)
 
         # ### 1 ###
         # # Home position (set all positions to 1)
@@ -50,101 +51,99 @@ def main():
         # time.sleep(1)
 
 
-        # ### Bonus ###
-        # crx10.set_pose(pose0) # x,y,z,w,p,r
+        # ### Added movement ###
+        # crx10.set_pose(pose0) # Move to just above the die
         # # Sync bit and move robot to first position
         # crx10.start_robot()
-        # time.sleep(.5)
+        # time.sleep(ts)
 
         # ### Line 3-7 ###
         # crx10.set_pose(pose1) # x,y,z,w,p,r
         # # Sync bit and move robot to first position
         # crx10.start_robot()
-        # time.sleep(.5)
+        # time.sleep(ts)
 
         # # Close gripper
         # crx10.gripper("close") #4
-        # time.sleep(.5)
+        # time.sleep(ts)
 
         # # Move and place die
         # # Brings the die to a point just above the prox sensors to avoid potential collisions with the robot gripper
         # crx10.set_pose(pose2) # 5
         # crx10.start_robot()
-        # time.sleep(.5)
+        # time.sleep(ts)
 
-        # # Sets the dice on the conveyer belt
-        # crx10.set_pose(pose3) # 6
-        # crx10.start_robot()
-        # time.sleep(.5)
+        # Sets the dice on the conveyer belt
+        crx10.set_pose(pose3) # 6
+        crx10.start_robot()
+        time.sleep(ts)
 
-        # # Place die on conveyor belt by opening the gripper
-        # crx10.gripper("open") # 7
-        # time.sleep(.5)
+        # Place die on conveyor belt by opening the gripper
+        crx10.gripper("open") # 7
+        time.sleep(ts)
 
-        # ### 8-16 ###
-        # # Turn on conveyer belt (see FANUCRegisterDefinitions for more info)
-        # # R[21] - DO137 for Beaker = forward conveyer. R[22] is reverse
-        # # R[30] - Converyor right (furthest) prox. sensor - DI139
-        # crx10.conveyor('forward') # 8
+        ### 8-16 ###
+        # Turn on conveyer belt (see FANUCRegisterDefinitions for more info)
+        crx10.conveyor('forward') # 8
 
-        # # Check if the proximity sensor has been tripped
-        # # NOTE: right_sensor_register = R[31]
-        # #       left_sensor_register = R[30]
-        # #       Obstructed sensor returns a '1'
-        
-        # while True: # 9-15
-        #     # Read the right proximity sensor
-        #     right_sensor_value = crx10.conveyor_proximity_sensor("right")
-        #     # Check if the sensor returns a '1'
-        #     if right_sensor_value == 1:
-        #         print("Right proximity sensor detected an object!")
-        #         # time.sleep(0.1)
-        #         break  # Exit the loop
-        #     time.sleep(0.1)
-
-
-        # print("Broke out of loop")
-        # crx10.conveyor('stop') # 16
-        # time.sleep(0.5)
+        # Check if the proximity sensor has been tripped
+        # NOTE: right_sensor_register = R[31]
+        #       left_sensor_register = R[30]
+        #       Obstructed sensor returns a '1'
 
         ### 17-... ###
-        crx10.set_pose(pose0) # 17 Returns to the dice's location using linear motion along the conveyor belt's length
+        crx10.set_pose(pose0) # 17 Returns to just above the dice's location using linear motion along the conveyor belt's length
         print('1')
-        crx10.start_robot()
+        crx10.start_robot(blocking=False) # MAYBE WILL CAUSE PROBLEMS
         print('2')
-        time.sleep(3)
+        time.sleep(ts)
+        
+        while True: # 9-15
+            # Read the right proximity sensor
+            right_sensor_value = crx10.conveyor_proximity_sensor("right")
+            # Check if the sensor returns a '1'
+            if right_sensor_value == 1:
+                print("Right proximity sensor detected an object!")
+                # time.sleep(0.1)
+                break  # Exit the loop
+            time.sleep(0.1)
+
+
+        print("Broke out of loop")
+        crx10.conveyor('stop') # 16
+        time.sleep(0.5)
 
         crx10.set_pose(pose1) # 17 Returns to the dice's location using linear motion along the conveyor belt's length
         print('1')
         crx10.start_robot()
         print('2')
-        time.sleep(3)
+        time.sleep(ts)
 
         
 
         crx10.gripper("close") # 18 Close gripper
-        time.sleep(3)
+        time.sleep(ts)
 
         # NOTE: pose 4 is defined entirely by joints
         crx10.set_pose(pose4) # 19 Lifts the dice
         crx10.start_robot()
-        time.sleep(3)
+        time.sleep(ts)
 
         # NOTE: pose 5 is defined entirely by joints
         crx10.set_pose(pose5) # 20 Rotates the dice 90 degrees
         crx10.start_robot()
-        time.sleep(3)
+        time.sleep(ts)
 
         crx10.set_pose(pose6) # 21 Lowers the dice back down NOTE: Using P[1] would reverse the 90degree die rotation
         crx10.start_robot()
-        time.sleep(3)
+        time.sleep(ts)
 
         crx10.gripper("open") # 22 Opens gripper
-        time.sleep(3)
+        time.sleep(ts)
 
         crx10.set_pose(pose0) # 21 Lowers the dice back down NOTE: Using P[1] would reverse the 90degree die rotation
         crx10.start_robot()
-        time.sleep(3)
+        time.sleep(ts)
 
         loops += 1
 
