@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """! @python program for FANUC robot control"""
 
-# IMPORTANT: Ensure the "ROS2-EIP_MAINV2".tp program is running on the teaching pendant
+# NOTE: Ensure the "ROS2-EIP_MAINV2".tp program is running on the teaching pendant
+
+# Use to locate where the die is stopped on the conveyer belt.
 
 # Imports
 import sys
@@ -38,11 +40,10 @@ pose6 = [88.79205322265625,24.91090202331543,-50.50844192504883,-6.8812532424926
 def main():
     """! Main program entry"""
        
-
     ## Initiializing Parameters
     # Create new robot object
     crx10 = robot(drive_path)
-    crx10.set_speed(200)  # Setting speed up to 250mm/s
+    crx10.set_speed(240)  # Setting speed up to 250mm/s
     
     # Start the main loop (Line 2)
     loops = 1
@@ -50,50 +51,10 @@ def main():
         
         try:
         
-            # Open gripper
-            crx10.gripper("open")
-            time.sleep(ts)
-
-            ### Home Position ###
-            crx10.set_pose(pose0) # Move to just above the die
-            crx10.start_robot()
-            time.sleep(ts)
-
-            ### Line 3-7 ###
-            crx10.set_pose(pose1) # x,y,z,w,p,r
-            crx10.start_robot()
-            time.sleep(ts)
-
-            # Close gripper
-            crx10.gripper("close") #4
-            time.sleep(ts)
-
-            # Move and place die
-            # Brings the die to a point just above the prox sensors to avoid potential collisions with the robot gripper
-            crx10.set_pose(pose2) # 5
-            crx10.start_robot()
-            time.sleep(ts)
-
-            # Sets the dice on the conveyer belt
-            crx10.set_pose(pose3) # 6
-            crx10.start_robot()
-            time.sleep(ts)
-
-            # Place die on conveyor belt by opening the gripper
-            crx10.gripper("open") # 7
-            time.sleep(ts)
-
-            ## 8-16 ###
             # Turn on conveyer belt (see FANUCRegisterDefinitions for more info)
             crx10.conveyor('forward') # 8
             # crx10.conveyor('stop') # 8
-
-            ### 17-... ###
-            crx10.set_pose(pose0) # 17 Returns to just above the dice's location using linear motion along the conveyor belt's length
-            # crx10.start_robot(blocking=False) # MAYBE WILL CAUSE PROBLEMS
-            crx10.start_robot() 
-            time.sleep(ts)
-            
+                   
             # Check if the proximity sensor has been tripped
             while True: # 9-15
                 # Read the right proximity sensor
@@ -105,44 +66,8 @@ def main():
                     break  # Exit the loop
                 time.sleep(0.1)
 
-
-            print("Broke out of loop")
-            crx10.conveyor('stop') # 16
-            time.sleep(0.5)
-
-            crx10.set_pose(pose1) # 17 Returns to the dice's location using linear motion along the conveyor belt's length
-            print('1')
-            crx10.start_robot()
-            print('2')
-            time.sleep(ts)
-
-            crx10.gripper("close") # 18 Close gripper
-            time.sleep(ts)
-
-            # NOTE: pose 4 is defined entirely by joints
-            crx10.set_pose(pose4) # 19 Lifts the dice
-            crx10.start_robot()
-            time.sleep(ts)
-
-            # NOTE: pose 5 is defined entirely by joints
-            crx10.set_pose(pose5) # 20 Rotates the dice 90 degrees
-            crx10.start_robot()
-            time.sleep(ts)
-
-            # !!! This will collide w/ the conveyor belt. CHANGE TO CARTESIAN!!!
-            crx10.set_pose(pose6) # 21 Lowers the dice back down NOTE: Using P[1] would reverse the 90degree die rotation
-            crx10.start_robot()
-            time.sleep(ts)
-
-            crx10.gripper("open") # 22 Opens gripper
-            time.sleep(ts)
-
-            crx10.set_pose(pose0) # 23
-            crx10.start_robot()
-            time.sleep(ts)
-
-            loops += 1
-            print(loops)
+                loops += 1
+            
         except KeyboardInterrupt:
             print("Shutting down conveyor and attempting to open gripper")
             crx10.conveyor('stop')
