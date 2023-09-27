@@ -11,6 +11,7 @@ def write_to_file(file_path, text):
     with open(file_path, 'a') as file:
         file.write(text+ '\n')
 
+
 current_directory = os.getcwd()
 
 file_path = os.path.join(current_directory, 'positionLog.txt')

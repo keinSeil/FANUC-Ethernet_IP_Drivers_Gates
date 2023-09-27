@@ -62,7 +62,7 @@ def main():
         # Execute move action
         crx10.start_robot()
         time.sleep(1)
-
+        print("1")
         # write new position in join 3-6 to 30
         crx10.write_joint_offset(3, -20)
         crx10.write_joint_offset(4, 30)
@@ -72,14 +72,18 @@ def main():
         # Execute move action
         crx10.start_robot()
         time.sleep(1)
+        print("2")
 
         crx10.write_joint_offset(4, -30)
         crx10.start_robot()
         time.sleep(1)
 
+        print("3")
+
         crx10.write_joint_offset(4, 30)
         crx10.start_robot()
         time.sleep(1)
+        print("4")
 
         # Home position (set all positions to 1)
         crx10.set_joints_to_home_position()
@@ -87,6 +91,7 @@ def main():
         # Execute move action
         crx10.start_robot()
         time.sleep(1)
+        print("5")
 
         crx10.write_joint_offset(6, -30)
         crx10.start_robot()
@@ -95,7 +100,7 @@ def main():
         crx10.write_joint_offset(6, 30)
         crx10.start_robot()
         time.sleep(1)
-
+        print("6")
         # Home position (set all positions to 1)
         crx10.set_joints_to_home_position()
 
